@@ -16,3 +16,8 @@ spec:
   - secretName: {{ template "peertube.tlsIngressSecretName" . }}
 {{- end }}
 {{- end }}
+  defaultBackend:
+    service:
+      name: {{ template "peertube.fullName" . }}
+      port:
+        name: ing2svc

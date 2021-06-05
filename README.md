@@ -10,7 +10,7 @@ This chart bootstraps a [PeerTube](https://joinpeertube.org/) deployment on a [K
 
 First run `helm dependency update`
 
-`helm install . --set deps.smtp.username=<username>`
+` helm install . --set pvc.storageClass=rook-ceph-block --set deps.smtp.username=leena --set deps.smtp.password=password --set deps.smtp.hostname=peertube.local --set deps.smtp.from=whoever --set deps.smtp.port=69 --set ingress.tls.enabled=false --set adminEmail=test@test.local --set webserver.hostname=test.local --generate-name`
 
 ## Configuration
 

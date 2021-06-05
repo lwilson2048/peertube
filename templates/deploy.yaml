@@ -46,7 +46,7 @@ spec:
 {{- else }}
               name: {{ template "peertube.postgresqlSecretName" . }}
 {{- end }}
-              key: postgres-password
+              key: postgresql-password
         - name: PEERTUBE_REDIS_HOSTNAME
 {{- if .Values.deps.redis.managed }}
           value: {{ .Values.redis.fullnameOverride }}-master
