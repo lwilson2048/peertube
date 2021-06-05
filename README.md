@@ -6,6 +6,12 @@ Federated (ActivityPub) video streaming platform using P2P (BitTorrent) directly
 
 This chart bootstraps a [PeerTube](https://joinpeertube.org/) deployment on a [Kubernetes](https://kubernetes.io/) cluster using the [Helm](https://www.helm.sh/) package manager.
 
+## Usage
+
+First run `helm dependency update`
+
+`helm install . --set deps.smtp.username=<username>`
+
 ## Configuration
 
 The following table lists the configurable parameters of the PeerTube chart and their default values.

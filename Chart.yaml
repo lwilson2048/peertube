@@ -2,6 +2,15 @@ apiVersion: "v1"
 name: "peertube"
 version: 0.0.1
 description: "Federated (ActivityPub) video streaming platform using P2P (BitTorrent) directly in the web browser with WebTorrent."
+dependencies:
+- name: postgresql
+  version: 10.4.9
+  condition: deps.pg.managed
+  repository: https://charts.bitnami.com/bitnami
+- name: redis
+  version: 14.3.3 
+  condition: deps.redis.managed
+  repository: https://charts.bitnami.com/bitnami
 keywords:
   - "peertube"
   - "video"
