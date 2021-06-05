@@ -1,9 +1,9 @@
 dependencies:
 - name: postgresql
-  version: 0.15.0
-  repository: https://kubernetes-charts.storage.googleapis.com/
+  version: 10.4.9
   condition: deps.pg.managed
+  repository: https://charts.bitnami.com/bitnami
 - name: redis
-  version: 3.6.2
-  repository: https://kubernetes-charts.storage.googleapis.com/
+  version: 14.3.3 
   condition: deps.redis.managed
+  repository: https://charts.bitnami.com/bitnami
