@@ -28,69 +28,122 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
+        # /!\ Prefer to use the PeerTube admin interface to set the following configurations /!\
+        - name: PEERTUBE_SIGNUP_ENABLED
+          value: true
+        - name: PEERTUBE_TRANSCODING_ENABLED
+          value: true
+        - name: PEERTUBE_CONTACT_FORM_ENABLED
+          value: true
+
+        # Database / Postgres service configuration
+        - name: POSTGRES_USER
+          value: <MY POSTGRES USERNAME>
+        - name: POSTGRES_PASSWORD
+          value: <MY POSTGRES PASSWORD>
+        # Postgres database name "peertube"
+        - name: POSTGRES_DB
+          value: peertube
+        # Editable only with a suffix :
+        - name: POSTGRES_DB
+          value: peertube_prod
+        - name: PEERTUBE_DB_SUFFIX
+          value: _prod
+        - name: PEERTUBE_DB_SSL
+          value: false
+
         - name: PEERTUBE_DB_HOSTNAME
-{{- if .Values.deps.pg.managed }}
+          {{- if .Values.deps.pg.managed }}
           value: {{ .Values.postgresql.fullnameOverride }}
-{{- else }}
+          {{- else }}
           value: {{ required "deps.pg.hostname required unless deps.pg.managed is true" .Values.deps.pg.hostname }}
-{{- end }}
+          {{- end }}
         - name: PEERTUBE_DB_USERNAME
-{{- if .Values.deps.pg.managed }}
+          {{- if .Values.deps.pg.managed }}
           value: {{ default "postgres" .Values.postgresql.postgresUser | quote }}
-{{- else }}
+          {{- else }}
           value: {{ required "deps.pg.username required unless deps.pg.managed is true" .Values.deps.pg.username }}
-{{- end }}
+          {{- end }}
         - name: PEERTUBE_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-{{- if .Values.deps.pg.managed }}
+              {{- if .Values.deps.pg.managed }}
               name: {{ .Values.postgresql.fullnameOverride }}
-{{- else }}
+              {{- else }}
               name: {{ template "peertube.postgresqlSecretName" . }}
-{{- end }}
+              {{- end }}
               key: postgresql-password
+
         - name: PEERTUBE_REDIS_HOSTNAME
-{{- if .Values.deps.redis.managed }}
+          {{- if .Values.deps.redis.managed }}
           value: {{ .Values.redis.fullnameOverride }}-master
-{{- else }}
+          {{- else }}
           value: {{ required "deps.redis.hostname required unless deps.redis.managed is true" .Values.deps.redis.hostname }}
-{{- end }}
+          {{- end }}
+
+        # E-mail configuration
+        # If you use a Custom SMTP server
+        - name: PEERTUBE_SMTP_DISABLE_STARTTLS
+          value: false
+
+        # Default to Postfix service name "postfix" in docker-compose.yml
+        # May be the hostname of your Custom SMTP server
         - name: PEERTUBE_SMTP_HOSTNAME
           value: {{ required "deps.smtp.hostname required" .Values.deps.smtp.hostname }}
         - name: PEERTUBE_SMTP_USERNAME
           valueFrom:
             secretKeyRef:
-{{- if .Values.deps.smtp.existingSecret }}
+              {{- if .Values.deps.smtp.existingSecret }}
               name: {{ .Values.deps.smtp.existingSecret }}
-{{- else }}
+              {{- else }}
               name: {{ template "peertube.smtpSecretName" . }}
-{{- end }}
+              {{- end }}
               key: un
         - name: PEERTUBE_SMTP_PASSWORD
           valueFrom:
             secretKeyRef:
-{{- if .Values.deps.smtp.existingSecret }}
+              {{- if .Values.deps.smtp.existingSecret }}
               name: {{ .Values.deps.smtp.existingSecret }}
-{{- else }}
+              {{- else }}
               name: {{ template "peertube.smtpSecretName" . }}
-{{- end }}
+              {{- end }}
               key: pw
+        # Default to 25
         - name: PEERTUBE_SMTP_PORT
           value: {{ required "deps.smtp.port required" .Values.deps.smtp.port | quote }}
+        # Default to nopreply@<MY DOMAIN>
         - name: PEERTUBE_SMTP_FROM
           value: {{ required "deps.smtp.from required" .Values.deps.smtp.from }}
         - name: PEERTUBE_SMTP_TLS
           value: {{ .Values.deps.smtp.tls.enabled | quote }}
         - name: PEERTUBE_ADMIN_EMAIL
           value: {{ required "adminEmail required" .Values.adminEmail }}
+
+        # Postfix service configuration
+        - name: POSTFIX_myhostname
+          value: <MY DOMAIN>
+        # If you need to generate a list of sub/DOMAIN keys
+        # pass them as a whitespace separated string <DOMAIN>- name: 
+          value: <selector>
+        - name: OPENDKIM_DOMAINS
+          value: <MY DOMAIN>=peertube
+        # see https://github.com/wader/postfix-relay/pull/18
+        - name: OPENDKIM_RequireSafeKeys
+          value: no
+          
+        # Server configuration
+        # If you need more than one IP as trust_proxy
+        # pass them as a comma separated array:
+        - name: PEERTUBE_TRUST_PROXY
+          value: ["127.0.0.1", "loopback", "172.18.0.0/16"]
         - name: PEERTUBE_WEBSERVER_HOSTNAME
           value: {{ required "webserver.hostname required" .Values.webserver.hostname }}
         - name: PEERTUBE_WEBSERVER_PORT
-{{- if .Values.ingress.tls.enabled }}
+          {{- if .Values.ingress.tls.enabled }}
           value: "443"
-{{- else }}
+          {{- else }}
           value: "80"
-{{- end }}
+          {{- end }}
         - name: PEERTUBE_WEBSERVER_HTTPS
           value: {{ .Values.ingress.tls.enabled | quote }}
         ports:
@@ -110,13 +163,13 @@ spec:
           mountPath: /data
       volumes:
       - name: data
-{{- if .Values.pvc.enabled }}
+        {{- if .Values.pvc.enabled }}
         persistentVolumeClaim:
-{{- if .Values.pvc.existingClaim }}
+          {{- if .Values.pvc.existingClaim }}
           claimName: {{ .Values.pvc.existingClaim }}
-{{- else }}
+          {{- else }}
           claimName: {{ template "peertube.fullName" . }}
-{{- end }}
-{{- else }}
+          {{- end }}
+        {{- else }}
         emptyDir: {}
-{{- end }}
+        {{- end }}
