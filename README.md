@@ -6,6 +6,8 @@ Federated (ActivityPub) video streaming platform using P2P (BitTorrent) directly
 
 This chart bootstraps a [PeerTube](https://joinpeertube.org/) deployment on a [Kubernetes](https://kubernetes.io/) cluster using the [Helm](https://www.helm.sh/) package manager.
 
+This fork includes support for arm64 devices such as raspberry PI 4s as well as x86.
+
 ## Usage
 
 First run `helm dependency update`
