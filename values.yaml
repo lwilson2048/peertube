@@ -32,6 +32,9 @@ postgresql:
 redis:
   fullnameOverride: peertube-redis-1531009616
   usePassword: false
+  image:
+    repository: redis
+    tag: 6.2.4
   cluster:
     enabled: false
   master:
