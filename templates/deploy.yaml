@@ -38,16 +38,18 @@ spec:
 
         # Database / Postgres service configuration
         - name: POSTGRES_DB
-          value: {{ .Values.postgresql.postgresDatabase | quote }}
+          value: {{ .Values.postgresql.postgresqlDatabase | quote }}
         - name: PEERTUBE_DB_SSL
           value: "false"
 
         - name: PEERTUBE_DB_HOSTNAME
           {{- if .Values.deps.pg.managed }}
-          value: {{ .Values.postgresql.fullnameOverride | quote }}
+          value: "{{ .Values.postgresql.fullnameOverride }}-headless"
           {{- else }}
           value: {{ required "deps.pg.hostname required unless deps.pg.managed is true" .Values.deps.pg.hostname | quote }}
           {{- end }}
+        - name: PEERTUBE_DB_PORT
+          value: "5432"
         - name: PEERTUBE_DB_USERNAME
           {{- if .Values.deps.pg.managed }}
           value: {{ default "postgres" .Values.postgresql.postgresUser | quote }}
@@ -58,7 +60,7 @@ spec:
           valueFrom:
             secretKeyRef:
               {{- if .Values.deps.pg.managed }}
-              name: {{ .Values.postgresql.fullnameOverride | quote }}
+              name: {{ .Values.postgresql.fullnameOverride }}
               {{- else }}
               name: {{ template "peertube.postgresqlSecretName" . }}
               {{- end }}
