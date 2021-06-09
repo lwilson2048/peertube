@@ -1,9 +1,0 @@
-dependencies:
-- name: postgresql
-  version: 10.4.9
-  condition: deps.pg.managed
-  repository: https://charts.bitnami.com/bitnami
-- name: redis
-  version: 14.3.3 
-  condition: deps.redis.managed
-  repository: https://charts.bitnami.com/bitnami

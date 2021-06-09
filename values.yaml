@@ -1,7 +1,17 @@
+adminEmail: admin@localhost
+
 image:
   repository: chocobozzz/peertube
   tag: production-stretch
   pullPolicy: IfNotPresent
+
+config:
+  signupEnabled: false
+  transcodingEnabled: false
+  contactFormEnabled: false
+
+webserver:
+  hostname: localhost
 
 ingress:
   tls:
@@ -22,8 +32,17 @@ deps:
   redis:
     managed: true
   smtp:
+    existingSecret: false
+    username:
+    password:
+    hostname:
+    port:
+    from: noreply@localhost
     tls:
-      enabled: true
+      enabled: false
+      existingSecret: false
+      cert:
+      key:
 
 postgresql:
   fullnameOverride: peertube-postgresql-1531009616
