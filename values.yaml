@@ -51,6 +51,8 @@ postgresql:
 redis:
   fullnameOverride: peertube-redis-1531009616
   usePassword: false
+  auth:
+    enabled: false
   image:
     repository: redis
     tag: 6.2.4

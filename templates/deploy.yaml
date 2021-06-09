@@ -66,10 +66,13 @@ spec:
 
         - name: PEERTUBE_REDIS_HOSTNAME
           {{- if .Values.deps.redis.managed }}
-          value: "{{ .Values.redis.fullnameOverride }}-master"
+          value: "{{ .Values.redis.fullnameOverride }}-master-0.{{ .Values.redis.fullnameOverride }}-headless"
           {{- else }}
           value: {{ required "deps.redis.hostname required unless deps.redis.managed is true" .Values.deps.redis.hostname | quote }}
           {{- end }}
+
+        - name: PEERTUBE_REDIS_PORT
+          value: "6379"
 
         # E-mail configuration
         # If you use a Custom SMTP server
