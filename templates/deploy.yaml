@@ -24,6 +24,16 @@ spec:
       nodeSelector:
         beta.kubernetes.io/arch: amd64
       containers:
+      - name: postfix
+        image: mwader/postfix-relay
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 25
+            name: smtp
+        envFrom:
+          - secretRef:
+              name: peertube-postfix-secret
+
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -35,6 +45,27 @@ spec:
           value: {{ .Values.config.transcodingEnabled | quote }}
         - name: PEERTUBE_CONTACT_FORM_ENABLED
           value: {{ .Values.config.contactFormEnabled | quote }}
+
+        # E-mail configuration
+        # If you use a Custom SMTP server
+        - name: PEERTUBE_SMTP_DISABLE_STARTTLS
+          value: "false"
+
+        # Default to Postfix service name "postfix" in docker-compose.yml
+        # May be the hostname of your Custom SMTP server
+        - name: PEERTUBE_SMTP_HOSTNAME
+          value: {{ required "deps.smtp.hostname required" .Values.deps.smtp.hostname | quote }}
+        # Default to 25
+        - name: PEERTUBE_SMTP_PORT
+          value: {{ required "deps.smtp.port required" .Values.deps.smtp.port | quote }}
+        - name: PEERTUBE_SMTP_FROM
+          value: {{ required "deps.smtp.from required" .Values.deps.smtp.from | quote }}
+        - name: PEERTUBE_SMTP_TLS
+          value: {{ .Values.deps.smtp.tls.enabled | quote }}
+        - name: PEERTUBE_SMTP_DISABLE_STARTTLS
+          value: {{ .Values.deps.smtp.tls.enabled | quote }}
+        - name: PEERTUBE_ADMIN_EMAIL
+          value: {{ required "adminEmail required" .Values.adminEmail | quote }}
 
         # Database / Postgres service configuration
         - name: POSTGRES_DB
@@ -76,43 +107,9 @@ spec:
         - name: PEERTUBE_REDIS_PORT
           value: "6379"
 
-        # E-mail configuration
-        # If you use a Custom SMTP server
-        - name: PEERTUBE_SMTP_DISABLE_STARTTLS
-          value: "false"
+        - name: PEERTUBE_LOG_LEVEL
+          value: {{ .Values.config.logLevel | quote }}
 
-        # Default to Postfix service name "postfix" in docker-compose.yml
-        # May be the hostname of your Custom SMTP server
-        - name: PEERTUBE_SMTP_HOSTNAME
-          value: {{ required "deps.smtp.hostname required" .Values.deps.smtp.hostname | quote }}
-        - name: PEERTUBE_SMTP_USERNAME
-          valueFrom:
-            secretKeyRef:
-              {{- if .Values.deps.smtp.existingSecret }}
-              name: {{ .Values.deps.smtp.existingSecret }}
-              {{- else }}
-              name: {{ template "peertube.smtpSecretName" . }}
-              {{- end }}
-              key: un
-        - name: PEERTUBE_SMTP_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              {{- if .Values.deps.smtp.existingSecret }}
-              name: {{ .Values.deps.smtp.existingSecret | quote }}
-              {{- else }}
-              name: {{ template "peertube.smtpSecretName" . }}
-              {{- end }}
-              key: pw
-        # Default to 25
-        - name: PEERTUBE_SMTP_PORT
-          value: {{ required "deps.smtp.port required" .Values.deps.smtp.port | quote }}
-        # Default to nopreply@<MY DOMAIN>
-        - name: PEERTUBE_SMTP_FROM
-          value: {{ required "deps.smtp.from required" .Values.deps.smtp.from | quote }}
-        - name: PEERTUBE_SMTP_TLS
-          value: {{ .Values.deps.smtp.tls.enabled | quote }}
-        - name: PEERTUBE_ADMIN_EMAIL
-          value: {{ required "adminEmail required" .Values.adminEmail | quote }}
 
         # Server configuration
         # If you need more than one IP as trust_proxy

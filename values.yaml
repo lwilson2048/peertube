@@ -9,13 +9,14 @@ config:
   signupEnabled: false
   transcodingEnabled: false
   contactFormEnabled: false
+  logLevel: debug
 
 webserver:
   hostname: localhost
 
 ingress:
   tls:
-    enabled: true
+    enabled: false
 
 service:
   type: NodePort
@@ -33,10 +34,10 @@ deps:
     managed: true
   smtp:
     existingSecret: false
-    username:
-    password:
-    hostname:
-    port:
+    username: a
+    password: a
+    hostname: localhost
+    port: 25
     from: noreply@localhost
     tls:
       enabled: false
